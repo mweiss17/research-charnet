@@ -152,7 +152,6 @@ class CharNet(nn.Module):
         pred_word_fg, pred_word_tblr, pred_word_orient = self.word_detector(features)
         pred_char_fg, pred_char_tblr, pred_char_orient = self.char_detector(features)
         recognition_results = self.char_recognizer(features)
-
         pred_word_fg = F.softmax(pred_word_fg, dim=1)
         pred_char_fg = F.softmax(pred_char_fg, dim=1)
         pred_char_cls = F.softmax(recognition_results, dim=1)
@@ -166,7 +165,6 @@ class CharNet(nn.Module):
             pred_char_tblr, pred_char_cls,
             pred_char_orient
         )
-
         char_bboxes, char_scores, word_instances = self.post_processing(
             pred_word_fg[0, 1], pred_word_tblr[0],
             pred_word_orient[0, 0], pred_char_fg[0, 1],

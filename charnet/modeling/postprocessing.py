@@ -71,6 +71,7 @@ class OrientedTextPostProcessing(nn.Module):
             im_scale_w, im_scale_h,
             original_im_w, original_im_h
     ):
+
         ss_word_bboxes = self.parse_word_bboxes(
             pred_word_fg, pred_word_tblr, pred_word_orient,
             im_scale_w, im_scale_h, original_im_w, original_im_h
@@ -93,6 +94,7 @@ class OrientedTextPostProcessing(nn.Module):
             pred_word_orient, scale_w, scale_h,
             W, H
     ):
+
         word_stride = self.word_stride
         word_keep_rows, word_keep_cols = np.where(pred_word_fg > self.word_min_score)
         oriented_word_bboxes = np.zeros((word_keep_rows.shape[0], 9), dtype=np.float32)

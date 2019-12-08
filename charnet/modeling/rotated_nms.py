@@ -10,7 +10,7 @@ import pyclipper
 from shapely.geometry import Polygon
 
 
-def nms(boxes, overlapThresh, neighbourThresh=0.5, minScore=0, num_neig=0):
+def nms(boxes, overlapThresh, neighbourThresh=0.1, minScore=0, num_neig=0):
     new_boxes = np.zeros_like(boxes)
     pick = []
     suppressed = [False for _ in range(boxes.shape[0])]
@@ -163,7 +163,7 @@ def softnms(boxes, box_scores, char_scores=None, overlapThresh=0.3,
         return keep, new_boxes
 
 
-def nms_poly(polys, scores, overlapThresh, neighbourThresh=0.5, minScore=0, num_neig=0):
+def nms_poly(polys, scores, overlapThresh, neighbourThresh=1.0, minScore=0, num_neig=0):
     pick = list()
     suppressed = [False for _ in range(len(polys))]
     polygons = [pyclipper.scale_to_clipper(poly.reshape((-1, 2))) for poly in polys]

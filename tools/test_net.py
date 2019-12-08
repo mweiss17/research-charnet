@@ -14,7 +14,7 @@ from charnet.config import cfg
 import matplotlib.pyplot as plt
 
 
-def save_word_recognition(word_instances, image_id, save_root, separator=chr(31)):
+def save_word_recognition(word_instances, char_instances, image_id, save_root, img, separator=chr(31)):
     with open('{}/{}.txt'.format(save_root, image_id), 'wt') as fw:
         for word_ins in word_instances:
             if len(word_ins.text) > 0:
@@ -22,7 +22,8 @@ def save_word_recognition(word_instances, image_id, save_root, separator=chr(31)
                 fw.write(separator)
                 fw.write(word_ins.text)
                 fw.write('\n')
-
+        im = vis(img, word_instances, char_instances)
+        cv2.imwrite(os.path.join(save_root, image_id + ".jpg"), im)
 
 def resize(im, size):
     h, w, _ = im.shape
@@ -35,7 +36,7 @@ def resize(im, size):
     return im, scale_w, scale_h, w, h
 
 
-def vis(img, word_instances):
+def vis(img, word_instances, char_bboxes=[]):
     img_word_ins = img.copy()
     for word_ins in word_instances:
         word_bbox = word_ins.word_bbox
@@ -46,6 +47,16 @@ def vis(img, word_instances):
             '{}'.format(word_ins.text),
             (word_bbox[0], word_bbox[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1
         )
+    for char_bbox in char_bboxes:
+        # import pdb; pdb.set_trace()
+        cv2.polylines(img_word_ins, [char_bbox[:8].reshape((-1, 2)).astype(np.int32)],
+                      True, (0, 255, 0), 2)
+        # cv2.putText(
+        #     img_word_ins,
+        #     '{}'.format(char_bbox.text),
+        #     (char_bbox[0], char_bbox[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1
+        # )
+
     return img_word_ins
 
 
@@ -67,15 +78,17 @@ if __name__ == '__main__':
     charnet.load_state_dict(torch.load(cfg.WEIGHT))
     charnet.eval()
     charnet.cuda()
-
     for im_name in sorted(os.listdir(args.image_dir)):
         print("Processing {}...".format(im_name))
         im_file = os.path.join(args.image_dir, im_name)
         im_original = cv2.imread(im_file)
+        print(im_original.shape[0] * im_original.shape[1])
+        # if im_original.shape[0] * im_original.shape[1] > 800000:
+        #     continue
         im, scale_w, scale_h, original_w, original_h = resize(im_original, size=cfg.INPUT_SIZE)
         with torch.no_grad():
             char_bboxes, char_scores, word_instances = charnet(im, scale_w, scale_h, original_w, original_h)
             save_word_recognition(
-                word_instances, os.path.splitext(im_name)[0],
-                args.results_dir, cfg.RESULTS_SEPARATOR
+                word_instances, char_bboxes, os.path.splitext(im_name)[0],
+                args.results_dir, im_original, cfg.RESULTS_SEPARATOR
             )

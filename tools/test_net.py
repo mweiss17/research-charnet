@@ -22,8 +22,10 @@ def save_word_recognition(word_instances, char_instances, image_id, save_root, i
                 fw.write(separator)
                 fw.write(word_ins.text)
                 fw.write('\n')
+        to_print = vis(img, word_instances)
+        cv2.imwrite(os.path.join(save_root, image_id + "_instance_level.jpg"), to_print)
         im = vis(img, word_instances, char_instances)
-        cv2.imwrite(os.path.join(save_root, image_id + ".jpg"), im)
+        cv2.imwrite(os.path.join(save_root, image_id + "_char_level.jpg"), im)
 
 def resize(im, size):
     h, w, _ = im.shape
@@ -48,7 +50,6 @@ def vis(img, word_instances, char_bboxes=[]):
             (word_bbox[0], word_bbox[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1
         )
     for char_bbox in char_bboxes:
-        # import pdb; pdb.set_trace()
         cv2.polylines(img_word_ins, [char_bbox[:8].reshape((-1, 2)).astype(np.int32)],
                       True, (0, 255, 0), 2)
         # cv2.putText(
